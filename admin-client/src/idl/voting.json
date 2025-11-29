@@ -1,0 +1,203 @@
+{
+  "version": "0.1.0",
+  "name": "voting",
+  "instructions": [
+    {
+      "name": "initPoll",
+      "accounts": [
+        {
+          "name": "poll",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "candidates",
+          "type": {
+            "vec": "string"
+          }
+        },
+        {
+          "name": "startTs",
+          "type": "i64"
+        },
+        {
+          "name": "endTs",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "vote",
+      "accounts": [
+        {
+          "name": "poll",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "voter",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "candidateIdx",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Poll",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "candidates",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "votes",
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "startTs",
+            "type": "i64"
+          },
+          {
+            "name": "endTs",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Voter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "poll",
+            "type": "publicKey"
+          },
+          {
+            "name": "wallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "hasVoted",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotEnoughCandidates",
+      "msg": "Not enough candidates"
+    },
+    {
+      "code": 6001,
+      "name": "TooManyCandidates",
+      "msg": "Too many candidates"
+    },
+    {
+      "code": 6002,
+      "name": "TitleTooLong",
+      "msg": "Title too long"
+    },
+    {
+      "code": 6003,
+      "name": "BadSchedule",
+      "msg": "Start/end timestamps invalid"
+    },
+    {
+      "code": 6004,
+      "name": "TooEarly",
+      "msg": "Voting has not started"
+    },
+    {
+      "code": 6005,
+      "name": "Closed",
+      "msg": "Voting is closed"
+    },
+    {
+      "code": 6006,
+      "name": "BadCandidate",
+      "msg": "Candidate index out of range"
+    },
+    {
+      "code": 6007,
+      "name": "CandidateNameTooLong",
+      "msg": "Candidate name too long"
+    },
+    {
+      "code": 6008,
+      "name": "EmptyCandidateName",
+      "msg": "Candidate name cannot be empty"
+    },
+    {
+      "code": 6009,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "metadata": {
+    "address": "Vote111111111111111111111111111111111111111"
+  }
+}

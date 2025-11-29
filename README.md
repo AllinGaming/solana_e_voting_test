@@ -6,6 +6,8 @@ Anchor program + simple TypeScript client. Votes and results live fully on-chain
 - `Anchor.toml` / `Cargo.toml`: Anchor workspace config.
 - `programs/voting/src/lib.rs`: Rust smart contract (heavily commented).
 - `client/`: Minimal TS script to init a poll and vote (for demos or integration tests), plus Firebase bootstrap helpers.
+- `admin-client/`: Vite + React admin UI to create polls (wallet adapter + Anchor).
+- `user-client/`: Vite + React voter UI to load a poll PDA and cast a vote (wallet adapter + Anchor).
 
 ### Prereqs
 - Rust + Solana CLI + Anchor CLI installed.
@@ -49,6 +51,14 @@ npm start
   - Call `vote` for candidate 0.
 - Swap the title/candidates/time window and the private key to fit your test.
   - Defaults to localnet. To target devnet instead, set `SOLANA_RPC_URL=https://api.devnet.solana.com` and deploy your program there (update `Anchor.toml`/`declare_id!`).
+
+### Web clients (admin + user)
+- Admin (create polls): `cd admin-client && cp .env.example .env.local && npm install && npm run dev`
+  - Fill `VITE_PROGRAM_ID` and `VITE_RPC_URL` to match your deployment.
+  - Connect a wallet (Phantom/Solflare supported out of the box), enter title/candidates/start/duration, and create the poll. The UI shows the poll PDA to share.
+- User (vote): `cd user-client && cp .env.example .env.local && npm install && npm run dev`
+  - Fill the same env vars; enter the poll PDA from the admin and load the poll, then pick a candidate and vote.
+  - Uses the same wallet adapter setup; ensure the poll exists on the cluster you point to.
 
 ### Firebase + Firestore (bind email -> wallet)
 - Client bootstrap helper: `client/src/firebase.ts` exports `initFirebase()` (returns `{ app, auth, db }`), `getBoundWallet`, and `bindWalletOnce`.
