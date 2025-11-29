@@ -1,0 +1,19 @@
+{
+  "name": "voting-client",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.95.2",
+    "dotenv": "^16.4.5",
+    "firebase": "^10.12.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
