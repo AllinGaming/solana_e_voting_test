@@ -4,7 +4,7 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
 import type { Idl } from "@coral-xyz/anchor";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey, SendTransactionError, SystemProgram } from "@solana/web3.js";
 import { Buffer } from "buffer";
 import idl from "./idl/voting.json";
 import { authApi, bindWallet, fetchBoundWallet, initFirebase, watchAuth } from "./firebase";
@@ -38,6 +38,22 @@ function derivePollPda(authority: PublicKey, title: string): PublicKey {
     PROGRAM_ID
   );
   return pda;
+}
+
+async function formatError(err: unknown, connection?: Parameters<SendTransactionError["getLogs"]>[0]) {
+  if (err instanceof SendTransactionError) {
+    try {
+      const logs = await err.getLogs(connection);
+      if (logs?.length) {
+        return `${err.message} Logs: ${logs.join(" | ")}`;
+      }
+    } catch (logErr) {
+      console.error("Failed to fetch transaction logs", logErr);
+    }
+    return err.message;
+  }
+  if (err instanceof Error) return err.message;
+  return String(err);
 }
 
 function App() {
@@ -131,7 +147,8 @@ function App() {
       setStatus(`Poll created at ${pollPda.toBase58()}`);
     } catch (err) {
       console.error(err);
-      setStatus(String(err));
+      const msg = await formatError(err, program.provider.connection);
+      setStatus(msg);
     } finally {
       setLoading(false);
     }

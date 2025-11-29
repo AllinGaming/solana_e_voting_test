@@ -7,7 +7,6 @@ Anchor program + simple TypeScript client. Votes and results live fully on-chain
 - Local validator: `solana-test-validator --reset` (separate terminal) and `solana config set --url http://127.0.0.1:8899`.
 - Program ID: `anchor keys list` → paste into `programs/voting/src/lib.rs` `declare_id!` and `Anchor.toml`.
 - Build/deploy: `anchor build` then `anchor deploy` (validator must be running).
-- Client script: `cd client && npm install && npm start` (uses `client/.env.local`).
 - Admin UI: `cd admin-client && npm install && npm run dev`.
 - User UI: `cd user-client && npm install && npm run dev`.
 
