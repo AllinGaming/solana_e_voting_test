@@ -2,7 +2,7 @@ use anchor_lang::prelude::*; // Anchor prelude brings in common types/macros.
 
 /// Public program id generated after `anchor keys list`.
 /// Replace this with your actual program id and keep it in sync with Anchor.toml.
-declare_id!("Vote111111111111111111111111111111111111111"); // Placeholder program ID; update after keygen.
+declare_id!("DddwKhB21GsneUinJyEN7Uax3BoePhCgqcU68FTWX7bi"); // Synced to deployed program ID.
 
 #[program]
 pub mod voting {
@@ -33,7 +33,7 @@ pub mod voting {
         poll.votes = vec![0; poll.candidates.len()]; // Initialize vote counts to zero.
         poll.start_ts = start_ts; // Save start time.
         poll.end_ts = end_ts; // Save end time.
-        poll.bump = *ctx.bumps.get("poll").unwrap(); // Record bump used for PDA derivation.
+        poll.bump = ctx.bumps.poll; // Record bump used for PDA derivation.
         Ok(())
     }
 
@@ -62,7 +62,7 @@ pub mod voting {
         voter.has_voted = true; // Flag that this wallet voted.
         voter.poll = poll.key(); // Store poll reference.
         voter.wallet = ctx.accounts.wallet.key(); // Store voter wallet.
-        voter.bump = *ctx.bumps.get("voter").unwrap(); // Save bump for PDA recreation.
+        voter.bump = ctx.bumps.voter; // Save bump for PDA recreation.
 
         // Increment selected candidate count with overflow protection.
         poll.votes[idx] = poll
@@ -95,13 +95,14 @@ pub struct InitPoll<'info> {
 pub struct Vote<'info> {
     #[account(mut, has_one = authority)] // Must point to the correct authority; poll is mutable for vote counts.
     pub poll: Account<'info, Poll>, // Poll being voted on.
-    /// Poll authority (kept for future admin actions; not required to sign here)
+    /// CHECK: Read-only authority pubkey stored on the poll; no additional data is read or written.
     pub authority: AccountInfo<'info>, // Authority pubkey stored in the poll.
     #[account(
         init,
         payer = wallet, // Voter pays rent for their own record.
         seeds = [b"voter", poll.key().as_ref(), wallet.key().as_ref()], // PDA unique per (poll, wallet).
-        bump
+        bump,
+        space = 8 + Voter::SIZE // Discriminator + size of Voter.
     )]
     pub voter: Account<'info, Voter>, // Voter record PDA to mark participation.
     #[account(mut)]
@@ -134,6 +135,10 @@ pub struct Voter {
     pub wallet: Pubkey,  // Wallet that cast the vote.
     pub has_voted: bool, // Marker flag (always true once created).
     pub bump: u8,        // PDA bump for voter account.
+}
+impl Voter {
+    /// Size calculation for the Voter account (without discriminator).
+    pub const SIZE: usize = 32 + 32 + 1 + 1; // poll + wallet + has_voted + bump
 }
 
 /// Custom errors for clearer client UX.

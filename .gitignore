@@ -2,12 +2,17 @@
 target/
 **/target/
 .anchor/
+test-ledger/
 
 # Node / TypeScript
 node_modules/
 dist/
 client/node_modules/
 client/dist/
+admin-client/node_modules/
+admin-client/dist/
+user-client/node_modules/
+user-client/dist/
 
 # Env & secrets
 .env
@@ -20,6 +25,17 @@ client/.env.local
 client/.env.development.local
 client/.env.production.local
 client/.env.test.local
+admin-client/.env
+admin-client/.env.local
+admin-client/.env.development.local
+admin-client/.env.production.local
+admin-client/.env.test.local
+user-client/.env
+user-client/.env.local
+user-client/.env.development.local
+user-client/.env.production.local
+user-client/.env.test.local
+target/deploy/*.json
 
 # Logs & misc
 *.log

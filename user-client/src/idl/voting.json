@@ -1,24 +1,61 @@
 {
-  "version": "0.1.0",
-  "name": "voting",
+  "address": "DddwKhB21GsneUinJyEN7Uax3BoePhCgqcU68FTWX7bi",
+  "metadata": {
+    "name": "voting",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
   "instructions": [
     {
-      "name": "initPoll",
+      "name": "init_poll",
+      "docs": [
+        "Creates a new poll with a title, candidates, and schedule.",
+        "Authority pays rent for the poll account and becomes the poll admin."
+      ],
+      "discriminator": [
+        125,
+        33,
+        167,
+        77,
+        242,
+        214,
+        203,
+        107
+      ],
       "accounts": [
         {
           "name": "poll",
-          "isMut": true,
-          "isSigner": false
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  108,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "arg",
+                "path": "title"
+              }
+            ]
+          }
         },
         {
           "name": "authority",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -33,47 +70,84 @@
           }
         },
         {
-          "name": "startTs",
+          "name": "start_ts",
           "type": "i64"
         },
         {
-          "name": "endTs",
+          "name": "end_ts",
           "type": "i64"
         }
       ]
     },
     {
       "name": "vote",
+      "docs": [
+        "Casts a single vote for a candidate index.",
+        "Enforced rules:",
+        "- Voting window open (start_ts <= now <= end_ts)",
+        "- Candidate index in range",
+        "- One vote per wallet per poll (enforced by a unique voter PDA)"
+      ],
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
       "accounts": [
         {
           "name": "poll",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "authority",
-          "isMut": false,
-          "isSigner": false
+          "relations": [
+            "poll"
+          ]
         },
         {
           "name": "voter",
-          "isMut": true,
-          "isSigner": false
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poll"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
         },
         {
           "name": "wallet",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "candidateIdx",
+          "name": "candidate_idx",
           "type": "u8"
         }
       ]
@@ -82,67 +156,29 @@
   "accounts": [
     {
       "name": "Poll",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "title",
-            "type": "string"
-          },
-          {
-            "name": "candidates",
-            "type": {
-              "vec": "string"
-            }
-          },
-          {
-            "name": "votes",
-            "type": {
-              "vec": "u64"
-            }
-          },
-          {
-            "name": "startTs",
-            "type": "i64"
-          },
-          {
-            "name": "endTs",
-            "type": "i64"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
+      "discriminator": [
+        110,
+        234,
+        167,
+        188,
+        231,
+        136,
+        153,
+        111
+      ]
     },
     {
       "name": "Voter",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "poll",
-            "type": "publicKey"
-          },
-          {
-            "name": "wallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "hasVoted",
-            "type": "bool"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
+      "discriminator": [
+        241,
+        93,
+        35,
+        191,
+        254,
+        147,
+        17,
+        202
+      ]
     }
   ],
   "errors": [
@@ -197,7 +233,76 @@
       "msg": "Arithmetic overflow"
     }
   ],
-  "metadata": {
-    "address": "Vote111111111111111111111111111111111111111"
-  }
+  "types": [
+    {
+      "name": "Poll",
+      "docs": [
+        "On-chain poll configuration and results."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "candidates",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "votes",
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "start_ts",
+            "type": "i64"
+          },
+          {
+            "name": "end_ts",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Voter",
+      "docs": [
+        "Marks that a wallet has already voted in a poll."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "poll",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "has_voted",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
 }

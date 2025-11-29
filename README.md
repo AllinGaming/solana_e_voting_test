@@ -2,6 +2,15 @@
 
 Anchor program + simple TypeScript client. Votes and results live fully on-chain; Firebase Auth (UI-side) gates access. Firestore is optional but recommended to bind a Firebase user to a single wallet.
 
+### Quick start
+- Prereqs: Rust, Solana CLI, Anchor CLI, Node 20 (repo has `.nvmrc`), Phantom/Solflare wallet.
+- Local validator: `solana-test-validator --reset` (separate terminal) and `solana config set --url http://127.0.0.1:8899`.
+- Program ID: `anchor keys list` → paste into `programs/voting/src/lib.rs` `declare_id!` and `Anchor.toml`.
+- Build/deploy: `anchor build` then `anchor deploy` (validator must be running).
+- Client script: `cd client && npm install && npm start` (uses `client/.env.local`).
+- Admin UI: `cd admin-client && npm install && npm run dev`.
+- User UI: `cd user-client && npm install && npm run dev`.
+
 ### Project structure
 - `Anchor.toml` / `Cargo.toml`: Anchor workspace config.
 - `programs/voting/src/lib.rs`: Rust smart contract (heavily commented).
@@ -19,6 +28,8 @@ Anchor program + simple TypeScript client. Votes and results live fully on-chain
 - Copy `client/.env.example` to `client/.env.local` and fill in:
   - `PRIVATE_KEY` (base58 array from your Solana keypair; never commit this).
   - Firebase web config keys (`FIREBASE_*` from Firebase console).
+- Copy `admin-client/.env.example` to `.env.local` and fill in program id, RPC, and Firebase keys.
+- Copy `user-client/.env.example` to `.env.local` and fill in program id, RPC, and Firebase keys.
 
 ### Configure program id
 1) Run `anchor keys list` to generate the program key.
@@ -38,7 +49,7 @@ anchor deploy
 # anchor deploy --provider.cluster devnet
 ```
 
-### Client script (for quick manual calls)
+### Client script (quick demo)
 ```bash
 cd client
 npm install
@@ -54,11 +65,12 @@ npm start
 
 ### Web clients (admin + user)
 - Admin (create polls): `cd admin-client && cp .env.example .env.local && npm install && npm run dev`
-  - Fill `VITE_PROGRAM_ID` and `VITE_RPC_URL` to match your deployment.
-  - Connect a wallet (Phantom/Solflare supported out of the box), enter title/candidates/start/duration, and create the poll. The UI shows the poll PDA to share.
+  - Fill `VITE_PROGRAM_ID`, `VITE_RPC_URL`, and all Firebase `VITE_FIREBASE_*`.
+  - Flow: login/register (Firebase email/password), connect wallet, bind wallet (writes to Firestore), then create a poll (unique title per authority). UI shows the poll PDA to share.
 - User (vote): `cd user-client && cp .env.example .env.local && npm install && npm run dev`
-  - Fill the same env vars; enter the poll PDA from the admin and load the poll, then pick a candidate and vote.
-  - Uses the same wallet adapter setup; ensure the poll exists on the cluster you point to.
+  - Fill the same env vars.
+  - Flow: login/register, connect wallet, bind wallet, load poll (by PDA or “Load latest”), select candidate, cast vote. After voting, the poll auto-refreshes.
+  - Voting UI stays hidden until signed in + wallet bound.
 
 ### Firebase + Firestore (bind email -> wallet)
 - Client bootstrap helper: `client/src/firebase.ts` exports `initFirebase()` (returns `{ app, auth, db }`), `getBoundWallet`, and `bindWalletOnce`.
@@ -103,8 +115,8 @@ npm start
   - `anchor build && anchor deploy` (devnet).
   - Run `client` script with your keypair to create a poll and cast one vote.
   - Try voting again with the same wallet on the same poll → should fail (PDA already exists).
-  - Connect a different wallet → should be able to cast once (unless blocked by your Firestore binding).
-  - Toggle `start_ts/end_ts` to ensure `TooEarly` and `Closed` errors trigger when expected.
+- Connect a different wallet → should be able to cast once (unless blocked by your Firestore binding).
+- Toggle `start_ts/end_ts` to ensure `TooEarly` and `Closed` errors trigger when expected.
 
 ### Moving to GitHub / another machine
 - Commit everything except secrets (env files, keypairs). `.gitignore` already covers common cases.
