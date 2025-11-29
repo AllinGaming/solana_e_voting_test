@@ -1,4 +1,4 @@
-## Solana e-voting (studentski parlament, devnet)
+## Solana e-voting
 
 Anchor program + simple TypeScript client. Votes and results live fully on-chain; Firebase Auth (UI-side) gates access. Firestore is optional but recommended to bind a Firebase user to a single wallet.
 
